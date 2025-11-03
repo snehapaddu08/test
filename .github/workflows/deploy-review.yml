@@ -1,0 +1,23 @@
+name: deploy-review
+on: workflow_dispatch
+permissions:
+  deployments: write
+  contents: read
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const res = await github.request('POST /repos/{owner}/{repo}/deployments', {
+              owner,
+              repo,
+              ref: 'main',
+              environment: 'staging',
+              required_contexts: [],
+              auto_merge: false,
+              description: 'Requires environment approval'
+            });
+            core.info(`Deployment id: ${res.data.id}`);
