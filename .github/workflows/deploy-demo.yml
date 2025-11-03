@@ -2,7 +2,6 @@ name: deploy-demo
 on:
   workflow_dispatch:
 
-# ✅ Give the GITHUB_TOKEN the rights we need
 permissions:
   contents: read
   deployments: write
@@ -12,65 +11,49 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Create a deployment (environment: staging)
+      - name: Create deployment (staging)
         id: create
         uses: actions/github-script@v7
         with:
           script: |
-            try {
-              const { owner, repo } = context.repo;
-              const res = await github.request('POST /repos/{owner}/{repo}/deployments', {
-                owner, repo,
-                ref: context.sha,            // deploy the current commit
-                environment: 'staging',
-                required_contexts: [],       // allow without checks
-                auto_merge: false,
-                description: 'Demo deployment via workflow'
-              });
-              core.setOutput('id', res.data.id);
-              core.info(`✅ Created deployment id: ${res.data.id}`);
-            } catch (e) {
-              core.setFailed(`❌ Create deployment failed: ${e.message}`);
-              core.info(e.stack || String(e));
-              throw e;
-            }
+            const { owner, repo } = context.repo;
+            const res = await github.request('POST /repos/{owner}/{repo}/deployments', {
+              owner,
+              repo,
+              ref: 'main',                 // or context.sha if you prefer
+              environment: 'staging',
+              required_contexts: [],
+              auto_merge: false,
+              description: 'Demo deployment via workflow'
+            });
+            core.setOutput('id', res.data.id);
 
       - name: Mark deployment in_progress
-        if: steps.create.outputs.id != ''
+        if: steps.create.outputs.id
         uses: actions/github-script@v7
         with:
           script: |
-            try {
-              const { owner, repo } = context.repo;
-              const id = '${{ steps.create.outputs.id }}';
-              await github.request('POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses', {
-                owner, repo, deployment_id: id,
-                state: 'in_progress',
-                log_url: 'https://example.com/deploy/logs'
-              });
-              core.info(`✅ Status in_progress posted for ${id}`);
-            } catch (e) {
-              core.setFailed(`❌ Post in_progress failed: ${e.message}`);
-              core.info(e.stack || String(e));
-              throw e;
-            }
+            const { owner, repo } = context.repo;
+            const id = '${{ steps.create.outputs.id }}';
+            await github.request('POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses', {
+              owner,
+              repo,
+              deployment_id: id,
+              state: 'in_progress',
+              log_url: 'https://example.com/deploy/logs'
+            });
 
       - name: Mark deployment success
-        if: steps.create.outputs.id != ''
+        if: steps.create.outputs.id
         uses: actions/github-script@v7
         with:
           script: |
-            try {
-              const { owner, repo } = context.repo;
-              const id = '${{ steps.create.outputs.id }}';
-              await github.request('POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses', {
-                owner, repo, deployment_id: id,
-                state: 'success',
-                environment_url: 'https://example.com/app'
-              });
-              core.info(`✅ Status success posted for ${id}`);
-            } catch (e) {
-              core.setFailed(`❌ Post success failed: ${e.message}`);
-              core.info(e.stack || String(e));
-              throw e;
-            }
+            const { owner, repo } = context.repo;
+            const id = '${{ steps.create.outputs.id }}';
+            await github.request('POST /repos/{owner}/{repo}/deployments/{deployment_id}/statuses', {
+              owner,
+              repo,
+              deployment_id: id,
+              state: 'success',
+              environment_url: 'https://example.com/app'
+            });
