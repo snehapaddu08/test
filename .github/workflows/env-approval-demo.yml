@@ -1,0 +1,11 @@
+name: env-approval-demo
+on: workflow_dispatch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    # This makes the job gated by the environment and shows the yellow banner
+    environment:
+      name: stagingg   # <-- must exactly match your environment name
+    steps:
+      - run: echo "hello; this job will start only after you approve the deployment"
