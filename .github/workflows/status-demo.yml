@@ -1,0 +1,25 @@
+name: status-demo
+on:
+  workflow_dispatch:
+
+jobs:
+  post-status:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set classic commit status
+        uses: actions/github-script@v7
+        with:
+          # This calls the Statuses API (classic) to create a commit status on the current SHA
+          script: |
+            const sha = context.sha;
+            const { owner, repo } = context.repo;
+            const res = await github.request('POST /repos/{owner}/{repo}/statuses/{sha}', {
+              owner,
+              repo,
+              sha,
+              state: 'success',                    // 'error' | 'failure' | 'pending' | 'success'
+              context: 'webhook-demo/status',     // status context name
+              description: 'Status set by workflow',
+              target_url: 'https://example.com/build/123'
+            });
+            core.info(`Created status id: ${res.data.id} on ${sha}`);
