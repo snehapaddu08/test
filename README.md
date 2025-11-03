@@ -1,10 +1,2 @@
 # test
-123
-45566
-<<<<<<< HEAD
-789
-adfsdf
-AUSDGSHKGSJGH
-=======
-3545748645342638748
->>>>>>> e588beb524a0affa9aa91312313393e4adeb4d7c
+testeed
