@@ -1,0 +1,9 @@
+name: check-demo
+on:
+  workflow_dispatch:
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print
+        run: echo "hello from check_run"
